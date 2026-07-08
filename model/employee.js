@@ -20,15 +20,15 @@ const employeeSchema = new mongoose.Schema({
     },
     email:{
         type:String,
-        unique:true
+       
     },
     mobile:{
         type:String,
-        required:true
+        
     },
     gender:{
         type:String,
-        enum:["male","female","other"]
+        enum:["male","female","other",""]
     },
     aadhaarNo:{
         type:String,
@@ -67,12 +67,20 @@ const employeeSchema = new mongoose.Schema({
         type:String,
         required:true
     },
+    designation:{
+       type:String,
+       required:true
+    },
     department_name:{
         type:String,
         required:true
     },
     DOJ:{
         type:Date,
+        required:true
+    },
+    workingHour:{
+        type:Number,
         required:true
     },
     earning:{},

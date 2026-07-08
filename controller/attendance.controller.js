@@ -1,4 +1,5 @@
 import Attendance from "../model/attendance.js";
+import Employee from "../model/employee.js";
 
 /**
  * 1. CREATE: Record Attendance (All data from Frontend)
@@ -6,38 +7,39 @@ import Attendance from "../model/attendance.js";
  */
 export const recordAttendance = async (req, res) => {
   try {
-    const { empId, compId, name, checkInTime, checkOutTime, status, workingHours, date } = req.body;
+    const {date} = req.query;
+    const {attendanceInfo} = req.body;
+    console.log(attendanceInfo)
+    const updatedAttendanceRecord = attendanceInfo.map((att)=>{
+      const selecteddate = new Date(date);
+    
 
-    // Validation
-    if (!empId || !compId || !name || !checkInTime || !checkOutTime || !status || !workingHours || !date) {
-      return res.status(400).json({ success: false, message: "Bhai, saari fields aani zaroori hain!" });
-    }
+      return {
+        empId:att.empErpId,
+        compId:att.companyId,
+        name:att.name,
+        checkInTime: new Date(`${date}T${att.checkIn}:00`) || null,
+        checkOutTime: new Date(`${date}T${att.checkOut}:00`) || null,
+        status:att.status,
+        workingHours:att.workingHours,
+        date:selecteddate.setHours(0, 0, 0, 0)
+        
+      }
+    
+    })
+
+   
 
     // Normalize date to midnight to prevent duplicate records on the same day
     const attendanceDate = new Date(date);
     attendanceDate.setHours(0, 0, 0, 0);
 
-    const existingRecord = await Attendance.findOne({ empId, date: attendanceDate });
-    if (existingRecord) {
-      return res.status(400).json({
-        success: false,
-        message: `Bhai, ${name} ka attendance is date (${date}) ke liye pehle se hi recorded hai!`
-      });
-    }
+   
+    const newAttendances = await Attendance.insertMany(updatedAttendanceRecord);
+   
 
-    const newAttendance = new Attendance({
-      empId,
-      compId,
-      name,
-      checkInTime: new Date(checkInTime),
-      checkOutTime: new Date(checkOutTime),
-      status,
-      workingHours,
-      date: attendanceDate
-    });
-
-    await newAttendance.save();
-    return res.status(201).json({ success: true, message: "Attendance successfully recorded!", data: newAttendance });
+ 
+    return res.status(201).json({ success: true, message: "Attendance successfully recorded!", data: newAttendances });
 
   } catch (error) {
     console.error("Error in recordAttendance:", error);
@@ -125,92 +127,16 @@ export const getMonthlyRegisterReport = async (req, res) => {
     const totalDaysInMonth = new Date(year, month, 0).getDate();
 
     // Database se data nikalna
-    const attendanceRecords = await Attendance.find({});
-    console.log(attendanceRecords)
-    const employeeMap = {};
+    const attendanceRecords = await Attendance.find({}).populate("empId");
+  
+    
 
-    attendanceRecords.forEach((record) => {
-      const empIdStr = record.empId.toString();
-      const dayOfMonth = new Date(record.date).getDate();
-
-      if (!employeeMap[empIdStr]) {
-        employeeMap[empIdStr] = {
-          empId: record.empId,
-          name: record.name,
-          days: {},
-          // Dynamic Summary Block - saare status tracks ke liye
-          summary: {
-            PRESENT: 0,
-            LATE: 0,
-            ABSENT: 0,
-            CL: 0,  // Casual Leave
-            WO: 0,  // Weekly Off
-            HD: 0,  // Half Day
-            PL: 0,  // Privilege Leave
-            SL: 0,  // Sick Leave
-            TOTAL_DUTY: 0
-          }
-        };
-      }
-
-      // Day record inject karna
-      employeeMap[empIdStr].days[dayOfMonth] = {
-        checkIn: record.checkInTime,
-        checkOut: record.checkOutTime,
-        status: record.status.toUpperCase(), // Eg: "CL", "WO", "PRESENT"
-        workingHours: record.workingHours
-      };
-
-      // --- DYNAMIC SUMMARY LOGIC ---
-      const currentStatus = record.status.toUpperCase();
-
-      // Agar status map ke predefined categories mein aata hai toh use increment karo
-      if (employeeMap[empIdStr].summary[currentStatus] !== undefined) {
-        employeeMap[empIdStr].summary[currentStatus]++;
-      }
-
-      // Total Duty count calculation (Jo payslip generation mein kaam aayega)
-      // Present, Late, ya Half-Day ko duty day mana jata hai (Aap apni policies ke hisab se modify kar sakte ho)
-      if (["PRESENT", "LATE", "HD", "WO"].includes(currentStatus)) {
-        employeeMap[empIdStr].summary.TOTAL_DUTY++;
-      }
-    });
-   console.log(employeeMap) 
-    // Final layout formatting
-    const finalReport = Object.values(employeeMap).map((emp) => {
-      const monthlyGrid = [];
-
-      for (let day = 1; day <= totalDaysInMonth; day++) {
-        if (emp.days[day]) {
-          monthlyGrid.push({
-            day: day,
-            hasRecord: true,
-            ...emp.days[day]
-          });
-        } else {
-          // Agar us din database mein koi record hi nahi dala admin ne, toh automatic ABSENT
-          monthlyGrid.push({
-            day: day,
-            hasRecord: false,
-            status: "ABSENT",
-            workingHours: "00:00"
-          });
-          emp.summary.ABSENT++;
-        }
-      }
-
-      return {
-        empId: emp.empId,
-        employeeName: emp.name,
-        attendanceGrid: monthlyGrid,
-        summary: emp.summary // Ab ye frontend par pura calculated box dega
-      };
-    });
+   
 
     return res.status(200).json({
       success: true,
-      meta: { companyId: compId, year: parseInt(year), month: parseInt(month), totalDaysInMonth },
-      data: finalReport
+      meta: { companyId: attendanceRecords[0].compId, year: parseInt(year), month: parseInt(month), totalDaysInMonth },
+      data: attendanceRecords
     });
 
   } catch (error) {
@@ -227,18 +153,42 @@ export const getCompanyAttendanceByDate = async (req, res) => {
   try {
     const { compId } = req.params;
     const { date } = req.query; // Query param: ?date=2026-03-15
-
+    console.log(date)
+    
     if (!date) {
       return res.status(400).json({ success: false, message: "Date query param me bhejna zaroori hai!" });
     }
 
     const searchDate = new Date(date);
-    searchDate.setHours(0, 0, 0, 0);
-
+   
+   
     const records = await Attendance.find({
       compId,
       date: searchDate
-    }).populate("empId", "name email department"); // Agar employee model se aur data chahiye to populate use karein
+    }).populate("empId compId"); // Agar employee model se aur data chahiye to populate use karein
+    if(records.length === 0){
+      console.log(compId)
+      console.log('attendance not found')
+        const emptyEmployeeAttendanceRecord = await Employee.find({company_id:compId}).populate("company_id")
+        console.log(emptyEmployeeAttendanceRecord)
+        return res.json({
+          success:true,
+          count:emptyEmployeeAttendanceRecord.length,
+          data:emptyEmployeeAttendanceRecord.map((emp)=>{
+            return {
+              empId:emp,
+              date:"",
+              compId:emp.company_id,
+              name:`${emp.firstName} ${emp.lastName}`,
+              status:"",
+              checkInTime:"",
+              checkOutTime:"",
+              workingHours:"00:00"
+
+            }
+          })
+        })
+    }
 
     return res.status(200).json({ success: true, count: records.length, data: records });
 

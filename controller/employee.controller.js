@@ -6,12 +6,13 @@ import Employee from "../model/employee.js"; // Adjust the path to your actual m
  * @access  Private
  */
 export const createEmployee = async (req, res) => {
+    console.log(req.body)
     try {
         const { empId, email, aadhaarNo, PanNo } = req.body;
 
         // 1. Check if employee with unique fields already exists
         const existingEmployee = await Employee.findOne({
-            $or: [{ empId }, { email }]
+            $or: [{ empId }]
         });
 
         if (existingEmployee) {
@@ -31,6 +32,7 @@ export const createEmployee = async (req, res) => {
             data: savedEmployee
         });
     } catch (error) {
+        console.log(error)
         return res.status(500).json({
             success: false,
             message: "Server Error: Failed to create employee",
@@ -44,31 +46,22 @@ export const createEmployee = async (req, res) => {
  * @route   GET /api/employees
  * @access  Private
  */
-export const getAllEmployees = async (req, res) => {
+export const getAllEmployeesByCompany = async (req, res) => {
+
+      
+
+
+
+    const {company_id} = req.params;
     try {
-        const { company_id, page = 1, limit = 10 } = req.query;
-        
-        // Build a dynamic filter object
-        const filter = {};
-        if (company_id) filter.company_id = company_id;
-
-        // Pagination calculations
-        const skip = (parseInt(page) - 1) * parseInt(limit);
-
-        const employees = await Employee.find(filter)
-            .skip(skip)
-            .limit(parseInt(limit))
-            .sort({ createdAt: -1 }); // Assumes timestamps, otherwise fallback to _id
-
-        const totalEmployees = await Employee.countDocuments(filter);
-
-        return res.status(200).json({
-            success: true,
-            count: employees.length,
-            totalPages: Math.ceil(totalEmployees / limit),
-            currentPage: parseInt(page),
-            data: employees
-        });
+        const employees = await Employee.find({company_id})
+     
+         
+          return res.status(200).json({
+              success:true,
+              data:employees
+          })
+     
     } catch (error) {
         return res.status(500).json({
             success: false,
@@ -126,7 +119,7 @@ export const updateEmployee = async (req, res) => {
         const updatedEmployee = await Employee.findByIdAndUpdate(
             id,
             { $set: req.body },
-            { new: true, runValidators: true } // returns the updated doc & fires schema validations
+            {   returnDocument: "after" , runValidators: true } // returns the updated doc & fires schema validations
         );
 
         if (!updatedEmployee) {
