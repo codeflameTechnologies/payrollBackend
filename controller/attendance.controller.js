@@ -7,38 +7,69 @@ import Employee from "../model/employee.js";
  */
 export const recordAttendance = async (req, res) => {
   try {
-    const {date} = req.query;
-    const {attendanceInfo} = req.body;
+
+    const { date } = req.query;
+    console.log(date);
+    const { attendanceInfo } = req.body;
     console.log(attendanceInfo)
-    const updatedAttendanceRecord = attendanceInfo.map((att)=>{
+    const updatedAttendanceRecord = await attendanceInfo.map((att) => {
       const selecteddate = new Date(date);
-    
+
 
       return {
-        empId:att.empErpId,
-        compId:att.companyId,
-        name:att.name,
-        checkInTime: new Date(`${date}T${att.checkIn}:00`) || null,
-        checkOutTime: new Date(`${date}T${att.checkOut}:00`) || null,
-        status:att.status,
-        workingHours:att.workingHours,
-        date:selecteddate.setHours(0, 0, 0, 0)
-        
+        empId: att.empErpId,
+        compId: att.companyId,
+        name: att.name,
+        checkInTime: att.checkIn || null,
+        checkOutTime: att.checkOut || null,
+        status: att.status,
+        workingHours: att.workingHours,
+        date: selecteddate
+
       }
-    
+
+    })
+    const searchDate = new Date(date);
+
+
+    const records = await Attendance.find({
+      compId: updatedAttendanceRecord[0].compId,
+      date: searchDate
     })
 
-   
+    if (records.length > 0) {
+    const updateAttendanceRecordRes =  await Attendance.bulkWrite(
+        updatedAttendanceRecord.map((att) => ({
+          updateOne: {
+            filter: {
+              empId: att.empId,
+              compId: att.compId,
+              date: searchDate,
+            },
+            update: {
+              $set: {
+                name: att.name,
+                checkInTime: att.checkInTime,
+                checkOutTime: att.checkOutTime,
+                status: att.status,
+                workingHours: att.workingHours,
+              },
+            },
+            upsert: false, // true agar record na ho to insert bhi karna ho
+          },
+        }))
+      );
+      return res.status(201).json({ success: true, message: "Attendance successfully recorded!", data: updateAttendanceRecordRes });
+    }
 
-    // Normalize date to midnight to prevent duplicate records on the same day
-    const attendanceDate = new Date(date);
-    attendanceDate.setHours(0, 0, 0, 0);
+    console.log("after updating:", updatedAttendanceRecord)
 
-   
+
+
     const newAttendances = await Attendance.insertMany(updatedAttendanceRecord);
-   
 
- 
+
+
     return res.status(201).json({ success: true, message: "Attendance successfully recorded!", data: newAttendances });
 
   } catch (error) {
@@ -66,7 +97,7 @@ export const updateAttendance = async (req, res) => {
     if (checkOutTime) attendance.checkOutTime = new Date(checkOutTime);
     if (status) attendance.status = status;
     if (workingHours) attendance.workingHours = workingHours;
-    
+
     if (date) {
       const attendanceDate = new Date(date);
       attendanceDate.setHours(0, 0, 0, 0);
@@ -116,9 +147,9 @@ export const getMonthlyRegisterReport = async (req, res) => {
     const { compId, year, month } = req.query;
 
     if (!compId || !year || !month) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Bhai, compId, year aur month query params mein zaroori hain!" 
+      return res.status(400).json({
+        success: false,
+        message: "Bhai, compId, year aur month query params mein zaroori hain!"
       });
     }
 
@@ -128,10 +159,10 @@ export const getMonthlyRegisterReport = async (req, res) => {
 
     // Database se data nikalna
     const attendanceRecords = await Attendance.find({}).populate("empId");
-  
-    
 
-   
+
+
+
 
     return res.status(200).json({
       success: true,
@@ -154,40 +185,40 @@ export const getCompanyAttendanceByDate = async (req, res) => {
     const { compId } = req.params;
     const { date } = req.query; // Query param: ?date=2026-03-15
     console.log(date)
-    
+
     if (!date) {
       return res.status(400).json({ success: false, message: "Date query param me bhejna zaroori hai!" });
     }
 
     const searchDate = new Date(date);
-   
-   
+
+
     const records = await Attendance.find({
       compId,
       date: searchDate
     }).populate("empId compId"); // Agar employee model se aur data chahiye to populate use karein
-    if(records.length === 0){
+    if (records.length === 0) {
       console.log(compId)
       console.log('attendance not found')
-        const emptyEmployeeAttendanceRecord = await Employee.find({company_id:compId}).populate("company_id")
-        console.log(emptyEmployeeAttendanceRecord)
-        return res.json({
-          success:true,
-          count:emptyEmployeeAttendanceRecord.length,
-          data:emptyEmployeeAttendanceRecord.map((emp)=>{
-            return {
-              empId:emp,
-              date:"",
-              compId:emp.company_id,
-              name:`${emp.firstName} ${emp.lastName}`,
-              status:"",
-              checkInTime:"",
-              checkOutTime:"",
-              workingHours:"00:00"
+      const emptyEmployeeAttendanceRecord = await Employee.find({ company_id: compId }).populate("company_id")
+      console.log(emptyEmployeeAttendanceRecord)
+      return res.json({
+        success: true,
+        count: emptyEmployeeAttendanceRecord.length,
+        data: emptyEmployeeAttendanceRecord.map((emp) => {
+          return {
+            empId: emp,
+            date: "",
+            compId: emp.company_id,
+            name: `${emp.firstName} ${emp.lastName}`,
+            status: "",
+            checkInTime: "",
+            checkOutTime: "",
+            workingHours: "00:00"
 
-            }
-          })
+          }
         })
+      })
     }
 
     return res.status(200).json({ success: true, count: records.length, data: records });
