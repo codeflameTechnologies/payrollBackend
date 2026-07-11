@@ -61,6 +61,7 @@ export const getAllCompanies = async (req,res)=>{
 export const updateCompany = async (req,res)=>{
     const { companyId } = req.params;
     const { companyName,email,mobile,website,earning,deduction,leavePolicies } = req.body;
+    console.log(req.body)
     
     try {
         const company = await companyModal.findById(companyId);

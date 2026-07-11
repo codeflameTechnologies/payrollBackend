@@ -38,7 +38,7 @@ export const recordAttendance = async (req, res) => {
     })
 
     if (records.length > 0) {
-    const updateAttendanceRecordRes =  await Attendance.bulkWrite(
+      const updateAttendanceRecordRes = await Attendance.bulkWrite(
         updatedAttendanceRecord.map((att) => ({
           updateOne: {
             filter: {
@@ -144,6 +144,7 @@ export const deleteAttendance = async (req, res) => {
  */
 export const getMonthlyRegisterReport = async (req, res) => {
   try {
+   
     const { compId, year, month } = req.query;
 
     if (!compId || !year || !month) {
@@ -153,12 +154,26 @@ export const getMonthlyRegisterReport = async (req, res) => {
       });
     }
 
-    const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 0, 23, 59, 59, 999);
-    const totalDaysInMonth = new Date(year, month, 0).getDate();
+    const yearNum = Number(year);
+    const monthNum = Number(month);
+
+
+    const startDate = new Date(yearNum, monthNum - 1, 1);
+    const endDate = new Date(yearNum, monthNum, 0, 23, 59, 59, 999);
+   
+    const totalDaysInMonth = new Date(yearNum, monthNum, 0).getDate();
+
 
     // Database se data nikalna
-    const attendanceRecords = await Attendance.find({}).populate("empId");
+    const attendanceRecords = await Attendance.find({
+      compId,
+      date: {
+        $gte: startDate,
+        $lte: endDate,
+      },
+    })
+      .populate("empId")
+      .sort({ date: 1 });
 
 
 
@@ -166,7 +181,7 @@ export const getMonthlyRegisterReport = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      meta: { companyId: attendanceRecords[0].compId, year: parseInt(year), month: parseInt(month), totalDaysInMonth },
+      meta: { companyId: attendanceRecords[0]?.compId || "Not Found", year: parseInt(year), month: parseInt(month), totalDaysInMonth },
       data: attendanceRecords
     });
 
