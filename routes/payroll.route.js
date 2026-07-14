@@ -1,6 +1,11 @@
 import express from "express"
+import { adminVerify } from "../middleware/adminVerify";
+import { jwtVerify } from "../middleware/jwtVerify";
 
 const router = express.Router();
+
+router.use(jwtVerify)
+router.use(adminVerify)
 
 
 router.get("/",(req,res)=>{

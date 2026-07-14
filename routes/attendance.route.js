@@ -6,26 +6,28 @@ import {
   getCompanyAttendanceByDate,
   getMonthlyRegisterReport 
 } from "../controller/attendance.controller.js";
+import {jwtVerify} from "../middleware/jwtVerify.js";
+import { adminVerify } from "../middleware/adminVerify.js";
 
 const router = express.Router();
-
+router.use(jwtVerify)
 // --- 1. WRITE OPERATIONS (CREATE / UPDATE / DELETE) ---
 
 // Base route: POST /api/attendance/ -> Naya attendance record save karne ke liye (CL, WO, HD, PRESENT sab yahan se)
-router.post("/", recordAttendance);
+router.post("/",recordAttendance);
 
 // PUT /api/attendance/:id -> Kisi specific day ke attendance record ko update karne ke liye
 router.put("/:id", updateAttendance);
 
 // DELETE /api/attendance/:id -> Kisi galat entry ko database se delete karne ke liye
-router.delete("/:id", deleteAttendance);
+router.delete("/:id",adminVerify ,deleteAttendance);
 
 
 // --- 2. READ OPERATIONS / REPORTS (GET) ---
 
 // GET /api/attendance/register-report -> REGISTER MATRIX VIEW (Jo aapne register image bheji thi)
 // Postman Query Example: /api/attendance/register-report?compId=123&year=2026&month=3
-router.get("/register-report", getMonthlyRegisterReport);
+router.get("/register-report",adminVerify, getMonthlyRegisterReport);
 
 // GET /api/attendance/company/:compId -> Ek specific date par puri company ka data dekhne ke liye
 // Postman Query Example: /api/attendance/company/65b2d1?date=2026-03-15

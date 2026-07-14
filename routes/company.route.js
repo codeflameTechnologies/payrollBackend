@@ -5,8 +5,11 @@ import {
   updateCompany,
   deleteCompany,
 } from "../controller/company.controller.js";
+import { adminVerify } from "../middleware/adminVerify.js";
+import { jwtVerify } from "../middleware/jwtVerify.js";
 
 const router = express.Router();
+router.use(jwtVerify)
 
 // Get all companies
 router.get("/", getAllCompanies);
@@ -15,9 +18,9 @@ router.get("/", getAllCompanies);
 router.post("/", registerCompany);
 
 // Update company
-router.put("/:companyId", updateCompany);
+router.put("/:companyId" ,updateCompany);
 
 // Delete company
-router.delete("/:companyId", deleteCompany);
+router.delete("/:companyId" ,deleteCompany);
 
 export default router;

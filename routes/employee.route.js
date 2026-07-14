@@ -1,8 +1,11 @@
 import express from "express"
 import { createEmployee, getAllEmployeesByCompany, updateEmployee } from "../controller/employee.controller.js";
+import { jwtVerify } from "../middleware/jwtVerify.js";
+import { adminVerify } from "../middleware/adminVerify.js";
 
 const router = express.Router();
-
+router.use(jwtVerify)
+router.use(adminVerify)
 
 
 router.post("/",createEmployee)

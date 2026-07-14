@@ -1,20 +1,12 @@
 import express from "express";
-
+import { registerAdmin, loginAdmin, verifyOtp, resetPassword, sendForgotLink } from "../controller/auth.controller.js";
 
 const router = express.Router();
 
-router.get("/login", (req, res) => {
-    res.json({
-        "message": "Login route"
-    })
-})
-
-router.post("/signup",(req,res)=>{
-    res.json({
-        "message":"Signup route"
-    })
-})
-
-
+router.post("/signup", registerAdmin);
+router.post("/verify-otp",verifyOtp);
+router.post("/login", loginAdmin);
+router.post("/reset-password",resetPassword)
+router.post("/send-forgot-link",sendForgotLink);
 
 export default router;
