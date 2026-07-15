@@ -6,7 +6,7 @@ const router = express.Router();
 router.post("/signup", registerAdmin);
 router.post("/verify-otp",verifyOtp);
 router.post("/login", loginAdmin);
-router.post("/reset-password",resetPassword)
-router.post("/send-forgot-link",sendForgotLink);
+router.put("/reset-password",resetPassword)
+router.post("/send-forgot-link/:email",sendForgotLink);
 
 export default router;

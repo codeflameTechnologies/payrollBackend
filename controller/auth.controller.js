@@ -6,6 +6,22 @@ import { sendEmail } from '../utils/sendEmail.js';
 import { config } from "dotenv"
 config();
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Register admin
 export const registerAdmin = async (req, res) => {
   try {
@@ -144,7 +160,7 @@ export const sendForgotLink = async (req, res) => {
 
     sendEmail(
       admin.email,
-      "Password Reset Request – Codeflame Institute ERP",
+      "Password Reset Request – Codeflame Payroll ERP",
       `
   <div style="
     font-family: 'Segoe UI', Tahoma, sans-serif;
@@ -174,7 +190,7 @@ export const sendForgotLink = async (req, res) => {
       <h3 style="color: #111827; margin-top: 0;">Reset Your Password</h3>
 
       <p style="color: #374151; font-size: 15px; line-height: 1.6;">
-        A request to reset your password has been received for your Codeflame Institute ERP admin account.
+        A request to reset your password has been received for your Codeflame Payroll ERP admin account.
         If this was you, click the secure button below to reset your password.
       </p>
 

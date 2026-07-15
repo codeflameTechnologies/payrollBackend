@@ -1,5 +1,5 @@
 import express from "express"
-import { createEmployee, getAllEmployeesByCompany, updateEmployee } from "../controller/employee.controller.js";
+import { createEmployee, getAllEmployeesByCompany, updateEmployee,deleteEmployee } from "../controller/employee.controller.js";
 import { jwtVerify } from "../middleware/jwtVerify.js";
 import { adminVerify } from "../middleware/adminVerify.js";
 
@@ -13,11 +13,7 @@ router.get("/:company_id",getAllEmployeesByCompany)
 
 
 router.put("/:id",updateEmployee)
-router.delete("/",(req,res)=>{
-    res.json({
-        "message":"Employee delete route"
-    })
-})
+router.delete("/:id",deleteEmployee)
 
 
 

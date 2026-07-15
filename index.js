@@ -7,6 +7,7 @@ import employeeRoute from "./routes/employee.route.js";
 import authRoute from "./routes/auth.route.js";
 import accessRoute from "./routes/access.route.js";
 import cors from "cors";
+import { jwtVerify } from "./middleware/jwtVerify.js";
 
 config();
 
@@ -18,6 +19,10 @@ app.use(express.json());
 app.use(cors());
 
 const PORT = process.env.PORT || 8000;
+
+app.get("/codeflame/payroll",jwtVerify,(req,res)=>{
+  return res.json(req.user);
+})
 
 app.use("/codeflame/payroll/api/auth", authRoute);
 app.use("/codeflame/payroll/api/access", accessRoute);

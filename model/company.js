@@ -17,6 +17,9 @@ const companySchema = new mongoose.Schema({
     website:{
         type:String 
     },
+    address:{
+        type:String
+    },
     earning:[],
     deduction:[],
     leavePolicies:[]

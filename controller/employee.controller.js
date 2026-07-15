@@ -1,3 +1,4 @@
+import attendance from "../model/attendance.js";
 import Employee from "../model/employee.js"; // Adjust the path to your actual model file
 
 /**
@@ -153,6 +154,7 @@ export const deleteEmployee = async (req, res) => {
         const { id } = req.params;
 
         const deletedEmployee = await Employee.findByIdAndDelete(id);
+        await attendance.deleteMany({empId:id})
 
         if (!deletedEmployee) {
             return res.status(404).json({
