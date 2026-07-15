@@ -83,7 +83,7 @@ export const loginAdmin = async (req, res) => {
     
     <div style="text-align: center; margin-bottom: 20px;">
       <h2 style="color: #2563eb; margin: 0; font-size: 28px;">
-        Codeflame Institute ERP
+        Codeflame Payroll ERP
       </h2>
       <p style="color: #6b7280; font-size: 14px; margin-top: 5px;">
         Your Secure Login OTP
@@ -102,7 +102,7 @@ export const loginAdmin = async (req, res) => {
       </h3>
 
       <p style="color: #374151; font-size: 15px; line-height: 1.6;">
-        Use the OTP code below to complete your login to your Codeflame Institute ERP admin account.
+        Use the OTP code below to complete your login to your Codeflame Payroll ERP admin account.
       </p>
 
       <!-- OTP BOX -->
@@ -174,7 +174,7 @@ export const sendForgotLink = async (req, res) => {
     
     <div style="text-align: center; margin-bottom: 20px;">
       <h2 style="color: #2563eb; margin: 0; font-size: 28px;">
-        Codeflame Institute ERP
+        Codeflame Payroll ERP
       </h2>
       <p style="color: #6b7280; font-size: 14px; margin-top: 5px;">
         Secure Reset Password Request
