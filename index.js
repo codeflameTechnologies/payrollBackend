@@ -31,6 +31,8 @@ app.use(
 
 const PORT = process.env.PORT || 8000;
 
+
+// check login
 app.get("/codeflame/payroll",jwtVerify,(req,res)=>{
   return res.json(req.user);
 })
