@@ -67,7 +67,7 @@ export const loginAdmin = async (req, res) => {
     admin.otp = otp;
     admin.otpExpires = Date.now() + 5 * 60 * 1000; // 5 minutes
     await admin.save();
-    sendEmail(
+  await sendEmail(
       admin.email,
       "Your Codeflame Payroll ERP OTP Code",
       `
@@ -158,7 +158,7 @@ export const sendForgotLink = async (req, res) => {
     const resetToken = admin.generateResetToken();
     await admin.save();
 
-    sendEmail(
+   await sendEmail(
       admin.email,
       "Password Reset Request – Codeflame Payroll ERP",
       `
