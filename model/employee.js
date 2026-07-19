@@ -16,7 +16,7 @@ const employeeSchema = new mongoose.Schema({
     },
     fatherName:{
         type:String,
-        required:true
+      
     },
     email:{
         type:String,
@@ -32,15 +32,15 @@ const employeeSchema = new mongoose.Schema({
     },
     aadhaarNo:{
         type:String,
-        required:true
+      
     },
     PFNo:{
         type:String,
-        required:true
+       
     },
     ESINo:{
         type:String,
-        required:true
+       
     },
     PanNo:{
         type:String,
@@ -48,20 +48,20 @@ const employeeSchema = new mongoose.Schema({
     },
     BankAccountNo:{
         type:String,   
-        required:true
+       
     },
     BankName:{
         type:String,
-        required:true
+       
     },
     BankIFSC:{
         type:String,
-        required:true
+       
     },
     company_id:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"Company",
-        required:true
+       
     },
     company_name:{
         type:String,
@@ -69,19 +69,19 @@ const employeeSchema = new mongoose.Schema({
     },
     designation:{
        type:String,
-       required:true
+     
     },
     department_name:{
         type:String,
-        required:true
+       
     },
     DOJ:{
         type:Date,
-        required:true
+       
     },
     workingHour:{
         type:Number,
-        required:true
+       
     },
     earning:{},
     deduction:{},
