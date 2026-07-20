@@ -173,7 +173,7 @@ export const getMonthlyRegisterReport = async (req, res) => {
       },
     })
       .populate("empId")
-      .sort({ date: 1 });
+      .sort({ checkInTime: 1 });
 
 
 
