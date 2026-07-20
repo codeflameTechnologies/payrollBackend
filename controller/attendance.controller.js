@@ -211,7 +211,7 @@ export const getCompanyAttendanceByDate = async (req, res) => {
     const records = await Attendance.find({
       compId,
       date: searchDate
-    }).populate("empId compId"); // Agar employee model se aur data chahiye to populate use karein
+    }).populate("empId compId").sort({checkInTime:1}); // Agar employee model se aur data chahiye to populate use karein
     if (records.length === 0) {
       console.log(compId)
       console.log('attendance not found')
