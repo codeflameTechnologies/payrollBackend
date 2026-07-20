@@ -9,9 +9,8 @@ export const recordAttendance = async (req, res) => {
   try {
 
     const { date } = req.query;
-    console.log(date);
+   
     const { attendanceInfo } = req.body;
-    console.log(attendanceInfo)
     const updatedAttendanceRecord = await attendanceInfo.map((att) => {
       const selecteddate = new Date(date);
 
@@ -62,7 +61,7 @@ export const recordAttendance = async (req, res) => {
       return res.status(201).json({ success: true, message: "Attendance successfully recorded!", data: updateAttendanceRecordRes });
     }
 
-    console.log("after updating:", updatedAttendanceRecord)
+   
 
 
 
@@ -199,7 +198,7 @@ export const getCompanyAttendanceByDate = async (req, res) => {
   try {
     const { compId } = req.params;
     const { date } = req.query; // Query param: ?date=2026-03-15
-    console.log(date)
+  
 
     if (!date) {
       return res.status(400).json({ success: false, message: "Date query param me bhejna zaroori hai!" });
@@ -211,12 +210,12 @@ export const getCompanyAttendanceByDate = async (req, res) => {
     const records = await Attendance.find({
       compId,
       date: searchDate
-    }).populate("empId compId").sort({checkInTime:1}); // Agar employee model se aur data chahiye to populate use karein
+    }).populate("empId compId").sort({ checkInTime: 1 }); // Agar employee model se aur data chahiye to populate use karein
     if (records.length === 0) {
-      console.log(compId)
-      console.log('attendance not found')
+    
+    
       const emptyEmployeeAttendanceRecord = await Employee.find({ company_id: compId }).populate("company_id")
-      console.log(emptyEmployeeAttendanceRecord)
+  
       return res.json({
         success: true,
         count: emptyEmployeeAttendanceRecord.length,
